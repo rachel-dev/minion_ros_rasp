@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="minion">
+  <xacro:include filename="$(find minion_description)/urdf/common_properties.xacro"/>
+
+  <xacro:property name="base_width" value="0.15"/>
+  <xacro:property name="base_len" value="0.255"/>
+  <xacro:property name="base_height" value="0.036"/>
+  <xacro:property name="wheel_radius" value="0.032"/>
+  <xacro:property name="base_wheel_gap" value="0.002"/>
+  <xacro:property name="wheel_separation" value="0.20"/>
+  <xacro:property name="wheel_joint_offset" value="0.057"/>
+  <xacro:property name="wheel_width" value="0.027"/>
+  <xacro:property name="wheel_to_base" value="0.022"/>
+
+  <!--Interial macros-->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0" iyy="${m*(3*r*r+h*h)/12}" iyz = "0" izz="${m*r*r/2}"/> 
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="box_inertia" params="m w h d">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m / 12.0 * (d*d + h*h)}" ixy="0.0" ixz="0.0" iyy="${m / 12.0 * (w*w + h*h)}" iyz="0.0" izz="${m / 12.0 * (w*w + d*d)}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertia" params="m r">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${2.0*m*(r*r)/5.0}" ixy="0.0" ixz="0.0" iyy="${2.0*m*(r*r)/5.0}" iyz="0.0" izz="${2.0*m*(r*r)/5.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!--Base Footprint-->
+  <link name="base_footprint">
+    <xacro:box_inertia m="10" w="0.001" h="0.001" d="0.001"/>
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+            <box size="0.001 0.001 0.001" />
+        </geometry>
+    </visual>
+  </link>
+
+  <!--Base link-->
+  <link name="base_link">
+    <xacro:box_inertia m="1" w="${base_len}" h="${base_width}" d="${base_height}"/>
+    <visual>
+      <geometry>
+        <box size="${base_len} ${base_width} ${base_height}"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${base_len} ${base_width} ${base_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!--base_link to base_footprint Joint-->
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0 0 ${wheel_radius - wheel_to_base}" rpy="0 0 0" />
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+  </joint>
+
+  <!--Wheel link & joint macro-->
+  <xacro:macro name="wheel_f" params="prefix reflect">
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="light_black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="1" r="${wheel_radius}" h="${wheel_width}"/>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <axis xyz="0 1 0" rpy="0 0 0" />
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="${wheel_joint_offset} ${((base_width/2)+base_wheel_gap)*reflect} 0}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!--Wheel link & joint macro-->
+  <xacro:macro name="wheel_b" params="prefix reflect">
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertia m="1" r="${wheel_radius}" h="${wheel_width}"/>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <axis xyz="0 1 0" rpy="0 0 0" />
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="${-(wheel_joint_offset)} ${((base_width/2)+base_wheel_gap)*reflect} 0}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!--Create Front Left & Right Wheel links/joints-->
+  <xacro:wheel_f prefix="left_f" reflect="1"/>
+  <xacro:wheel_f prefix="right_f" reflect="-1"/>
+
+  <!--Create Back Left & Right Wheel links/joints-->
+  <xacro:wheel_b prefix="left_b" reflect="1"/>
+  <xacro:wheel_b prefix="right_b" reflect="-1"/>
+
+  <xacro:include filename="$(find minion_description)/urdf/minion_gazebo_plugins.gazebo.xacro"/>
+
+
+</robot>
