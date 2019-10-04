@@ -1,8 +1,0 @@
-<launch>
-  <arg name="multi_robot_name" default="minion"/>
-
-  <include file="$(find minion_bringup)/launch/minion_core.launch">
-    <arg name="multi_robot_name" value="$(arg multi_robot_name)"/>
-
-  <node pkg="minion_bringup" type="minion_diagnostics" name="minion_diagnostics" output="screen"/>
-</launch>
