@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>minion_teleop</name>
+  <version>0.0.1</version>
+  <description>
+    Provides teleoperation using keyboard for minion.
+  </description>
+  <license>BSD</license>
+  <author>Ruichao WU</author>
+  <author email="thlim@robotis.com">Darby Lim</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rospy</depend>
+  <depend>geometry_msgs</depend>
+</package>
